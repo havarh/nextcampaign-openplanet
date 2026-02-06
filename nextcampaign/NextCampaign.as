@@ -201,6 +201,9 @@ namespace NextCampaign
 
     void Render()
     {
+        if (!sEnabled) return;
+        if (sHideWithOP && !UI::IsOverlayShown()) return;
+
         auto app = cast<CTrackMania>(GetApp());
         if (app.RootMap !is null || app.CurrentPlayground !is null)
             return;
@@ -232,12 +235,15 @@ namespace NextCampaign
         }
 
         string textName = "\\$fffNext: " + nextCampaignName;
-        string releaseDate = "\\$fff" + Time::FormatString("%a, %d %B %Y at %H:%M ", int64(nextCampaignTimestamp));
+        string releaseDate = "\\$fff" + Time::FormatString("%A, %d %B %Y at %H:%M ", int64(nextCampaignTimestamp));
 
         UI::PushStyleColor(UI::Col::WindowBg, vec4(0.4f, 0.2f, 0.6f, 0.9f));
-        UI::Begin("NextCampaignOverlay", UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoResize | UI::WindowFlags::NoScrollbar | UI::WindowFlags::AlwaysAutoResize);
-        
-        UI::Text("NextCampaign");
+        int flags = UI::WindowFlags::NoResize | UI::WindowFlags::NoScrollbar | UI::WindowFlags::AlwaysAutoResize;
+        if (!sShowTitlebar) flags |= UI::WindowFlags::NoTitleBar;
+        UI::Begin("NextCampaign™", flags);
+        if (!sShowTitlebar) {
+            UI::Text("NextCampaign™");
+        }
         UI::Text(textName);
         UI::Separator();
         
@@ -260,7 +266,7 @@ namespace NextCampaign
         
         UI::Text("\\$fffWeb:");
         UI::SameLine();
-        if (UI::Selectable(Icons::ExternalLink + "\\$77f nextcampaign.m8.no", false)) {
+        if (UI::Selectable("\\$CCCnextcampaign.m8.no", false)) {
             OpenBrowserURL("https://nextcampaign.m8.no/");
         }
         
