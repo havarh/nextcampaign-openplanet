@@ -176,22 +176,85 @@ namespace NextCampaign
         return res;
     }
 
+    void DrawCountdownDigit(int value, const string &in label, bool leadingZero = true)
+    {
+        float width = 60.0f; // Fixed width for each column
+        UI::BeginGroup();
+        
+        // Number
+        string valStr = (leadingZero && value < 10 ? "0" : "") + value;
+        UI::PushFontSize(32);
+        vec2 textSize = UI::MeasureString(valStr);
+        UI::SetCursorPosX(UI::GetCursorPos().x + (width - textSize.x) / 2.0f);
+        UI::Text(valStr);
+        UI::PopFont();
+        
+        // Label
+        UI::PushFontSize(13);
+        textSize = UI::MeasureString(label);
+        UI::SetCursorPosX(UI::GetCursorPos().x + (width - textSize.x) / 2.0f);
+        UI::Text("\\$bbb" + label);
+        UI::PopFont();
+        
+        UI::EndGroup();
+    }
+
     void Render()
     {
         auto app = cast<CTrackMania>(GetApp());
         if (app.RootMap !is null || app.CurrentPlayground !is null)
             return;
 
-        string countdown = GetCountdown();
+        if (nextCampaignTimestamp == 0)
+            return;
+
+        uint64 nowStamp = Time::Stamp;
+        uint64 targetStamp = uint64(nextCampaignTimestamp);
+
+        auto now = Time::Parse(int64(nowStamp));
+        auto target = Time::Parse(int64(targetStamp));
+
+        int months = int(target.Month) - int(now.Month);
+        if (target.Year > now.Year) months += (int(target.Year) - int(now.Year)) * 12;
+        
+        int days = int(target.Day) - int(now.Day);
+        int hours = int(target.Hour) - int(now.Hour);
+        int mins = int(target.Minute) - int(now.Minute);
+
+        if (mins < 0) { mins += 60; hours--; }
+        if (hours < 0) { hours += 24; days--; }
+        if (days < 0) {
+            int prevMonth = int(target.Month) - 1;
+            int prevYear = int(target.Year);
+            if (prevMonth == 0) { prevMonth = 12; prevYear--; }
+            days += GetDaysInMonth(prevMonth, prevYear);
+            months--;
+        }
 
         string textName = "\\$fffNext: " + nextCampaignName;
-        string textCountdown = "New season: " + countdown + ""; //+ Icons::ClockO;
         string releaseDate = "\\$fff" + Time::FormatString("%a, %d %B %Y at %H:%M ", int64(nextCampaignTimestamp));
+
         UI::PushStyleColor(UI::Col::WindowBg, vec4(0.4f, 0.2f, 0.6f, 0.9f));
         UI::Begin("NextCampaignOverlay", UI::WindowFlags::NoTitleBar | UI::WindowFlags::NoResize | UI::WindowFlags::NoScrollbar | UI::WindowFlags::AlwaysAutoResize);
+        
         UI::Text("NextCampaign");
         UI::Text(textName);
-        UI::Text(textCountdown);
+        UI::Separator();
+        
+        if (UI::BeginTable("countdown", 4)) {
+            UI::TableSetupColumn("mo", UI::TableColumnFlags::WidthFixed, 60.0f);
+            UI::TableSetupColumn("d", UI::TableColumnFlags::WidthFixed, 60.0f);
+            UI::TableSetupColumn("h", UI::TableColumnFlags::WidthFixed, 60.0f);
+            UI::TableSetupColumn("m", UI::TableColumnFlags::WidthFixed, 60.0f);
+
+            UI::TableNextColumn(); DrawCountdownDigit(months, "months", false);
+            UI::TableNextColumn(); DrawCountdownDigit(days, "days", false);
+            UI::TableNextColumn(); DrawCountdownDigit(hours, "hours");
+            UI::TableNextColumn(); DrawCountdownDigit(mins, "minutes");
+            UI::EndTable();
+        }
+        
+        UI::Separator();
         UI::Text("Release date:");
         UI::Text(releaseDate);
         UI::Text("\\$fffWeb: nextcampaign.m8.no");
