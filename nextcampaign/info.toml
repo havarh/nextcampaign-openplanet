@@ -1,0 +1,5 @@
+[meta]
+name        = "NextCampaign"
+author      = "havarh"
+category    = "Testing"
+permissions = ["Http"]
