@@ -257,7 +257,13 @@ namespace NextCampaign
         UI::Separator();
         UI::Text("Release date:");
         UI::Text(releaseDate);
-        UI::Text("\\$fffWeb: nextcampaign.m8.no");
+        
+        UI::Text("\\$fffWeb:");
+        UI::SameLine();
+        if (UI::Selectable(Icons::ExternalLink + "\\$77f nextcampaign.m8.no", false)) {
+            OpenBrowserURL("https://nextcampaign.m8.no/");
+        }
+        
         UI::End();
         UI::PopStyleColor();
     }
