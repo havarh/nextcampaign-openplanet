@@ -1,5 +1,5 @@
 [meta]
 name        = "NextCampaign"
 author      = "havarh"
-category    = "Testing"
+category    = "Utilities"
 permissions = ["Http"]

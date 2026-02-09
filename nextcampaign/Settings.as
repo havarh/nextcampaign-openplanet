@@ -1,5 +1,5 @@
 [Setting category="Visibility" name="Enabled"]
-bool sEnabled = false;
+bool sEnabled = true;
 
 [Setting category="Visibility" name="Show/hide with Openplanet UI"]
 bool sHideWithOP = false;

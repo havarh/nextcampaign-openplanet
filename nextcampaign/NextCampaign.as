@@ -176,9 +176,8 @@ namespace NextCampaign
         return res;
     }
 
-    void DrawCountdownDigit(int value, const string &in label, bool leadingZero = true)
+    void DrawCountdownDigit(int value, const string &in label, float width = 60.0f, bool leadingZero = true)
     {
-        float width = 60.0f; // Fixed width for each column
         UI::BeginGroup();
         
         // Number
@@ -201,15 +200,18 @@ namespace NextCampaign
 
     void Render()
     {
-        if (!sEnabled) return;
+        //most of the UI checks here come from NaNInf's ChampionMedals via MedalsInMenu
+        auto app = cast<CTrackMania@>(GetApp());
+         if (!sEnabled) return;
         if (sHideWithOP && !UI::IsOverlayShown()) return;
 
-        auto app = cast<CTrackMania>(GetApp());
         if (app.RootMap !is null || app.CurrentPlayground !is null)
             return;
 
         if (nextCampaignTimestamp == 0)
             return;
+
+        float width = 35.0f; // Fixed width for each column /* 60.0f */
 
         uint64 nowStamp = Time::Stamp;
         uint64 targetStamp = uint64(nextCampaignTimestamp);
@@ -235,7 +237,7 @@ namespace NextCampaign
         }
 
         string textName = "\\$fffNext: " + nextCampaignName;
-        string releaseDate = "\\$fff" + Time::FormatString("%A, %d %B %Y at %H:%M ", int64(nextCampaignTimestamp));
+        string releaseDate = "\\$fff" + Time::FormatString("%a, %d %B %Y at %H:%M ", int64(nextCampaignTimestamp));
 
         UI::PushStyleColor(UI::Col::WindowBg, vec4(0.4f, 0.2f, 0.6f, 0.9f));
         int flags = UI::WindowFlags::NoResize | UI::WindowFlags::NoScrollbar | UI::WindowFlags::AlwaysAutoResize;
@@ -248,15 +250,15 @@ namespace NextCampaign
         UI::Separator();
         
         if (UI::BeginTable("countdown", 4)) {
-            UI::TableSetupColumn("mo", UI::TableColumnFlags::WidthFixed, 60.0f);
-            UI::TableSetupColumn("d", UI::TableColumnFlags::WidthFixed, 60.0f);
-            UI::TableSetupColumn("h", UI::TableColumnFlags::WidthFixed, 60.0f);
-            UI::TableSetupColumn("m", UI::TableColumnFlags::WidthFixed, 60.0f);
+            UI::TableSetupColumn("mo", UI::TableColumnFlags::WidthFixed, width);
+            UI::TableSetupColumn("d", UI::TableColumnFlags::WidthFixed, width);
+            UI::TableSetupColumn("h", UI::TableColumnFlags::WidthFixed, width);
+            UI::TableSetupColumn("m", UI::TableColumnFlags::WidthFixed, width);
 
-            UI::TableNextColumn(); DrawCountdownDigit(months, "months", false);
-            UI::TableNextColumn(); DrawCountdownDigit(days, "days", false);
-            UI::TableNextColumn(); DrawCountdownDigit(hours, "hours");
-            UI::TableNextColumn(); DrawCountdownDigit(mins, "minutes");
+            UI::TableNextColumn(); DrawCountdownDigit(months, "months", width, false);
+            UI::TableNextColumn(); DrawCountdownDigit(days, "days", width, false);
+            UI::TableNextColumn(); DrawCountdownDigit(hours, "hours", width);
+            UI::TableNextColumn(); DrawCountdownDigit(mins, "minutes", width);
             UI::EndTable();
         }
         
