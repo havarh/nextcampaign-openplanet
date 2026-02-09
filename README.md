@@ -18,10 +18,11 @@ NextCampaign is an Openplanet plugin for Trackmania that displays a countdown to
 ## Installation
 
 1. Ensure you have [Openplanet](https://openplanet.dev/) installed for Trackmania.
-2. Download or clone this repository.
-3. Copy the `nextcampaign` folder into your Openplanet `Plugins` directory:
+2. Enable developer mode in the Openplanet menu.
+3. Download or clone this repository.
+4. Copy the `nextcampaign` folder into your Openplanet `Plugins` directory:
    - Typically: `C:\Users\<YourUser>\OpenplanetNext\Plugins\NextCampaign`
-4. Restart the game or refresh your plugins in the Openplanet menu.
+5. Refresh your plugins in the Openplanet menu.
 
 ## Credits
 
