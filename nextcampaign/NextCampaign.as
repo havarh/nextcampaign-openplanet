@@ -300,16 +300,28 @@ namespace NextCampaign {
                 }
             }
         }
-        string currentName = "\\$s\\$CCCCurrent";//: " + currentCampaign;//fa0
-        string nextName = "\\$s\\$CCCNext";//: " + nextCampaignName;//fa0        
-        UI::PushFontSize(20);
-        UI::Text(currentName);
-        UI::PopFont();
-        UI::Text(currentCampaign);
-        UI::PushFontSize(20);
-        UI::Text(nextName);
-        UI::PopFont();
-        UI::Text(nextCampaignName);
+
+        if (UI::BeginTable("campaigns_info", 2)) {
+            // Row 1: Headers
+            UI::TableNextColumn();
+            UI::PushFontSize(20);
+            UI::Text("\\$s\\$CCCCurrent");
+            UI::PopFont();
+
+            UI::TableNextColumn();
+            UI::PushFontSize(20);
+            UI::Text("\\$s\\$CCCNext");
+            UI::PopFont();
+
+            // Row 2: Values
+            UI::TableNextColumn();
+            UI::Text(currentCampaign);
+
+            UI::TableNextColumn();
+            UI::Text(nextCampaignName);
+
+            UI::EndTable();
+        }
         UI::PushFontSize(20);
         UI::Text("\\$s\\$CCCNew season");
         UI::PopFont();
