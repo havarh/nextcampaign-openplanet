@@ -116,11 +116,10 @@ namespace NextCampaign {
     }
 
     int GetQuarterFromSeason(const string&in season) {
-        if (season == "Winter") return 1;
-        if (season == "Spring") return 2;
-        if (season == "Summer") return 3;
-        if (season == "Fall") return 4;
-        return 0;
+        array<string> seasons = { "Winter", "Spring", "Summer", "Fall" };
+        int idx = seasons.Find(season);
+        if (idx < 0) return 0;
+        return idx + 1;
     }
 
     int quartersSinceSummer2020(int year, int quarter) {
