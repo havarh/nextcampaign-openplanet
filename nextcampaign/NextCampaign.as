@@ -7,6 +7,7 @@ namespace NextCampaign {
     string nextCampaignName = "";
     uint nextCampaignTimestamp = 0;
     string currentCampaign = "";
+    array<string> seasons = { "Winter", "Spring", "Summer", "Fall" };
 
     uint lastFetchAttempt = 0;
 
@@ -96,8 +97,6 @@ namespace NextCampaign {
     // ===== SEASON LOGIC =====
 
     string NextSeason(const string&in current) {
-        array<string> seasons = { "Winter", "Spring", "Summer", "Fall" };
-
         auto parts = current.Split(" ");
         if (parts.Length != 2) return "";
 
@@ -116,7 +115,6 @@ namespace NextCampaign {
     }
 
     int GetQuarterFromSeason(const string&in season) {
-        array<string> seasons = { "Winter", "Spring", "Summer", "Fall" };
         int idx = seasons.Find(season);
         if (idx < 0) return 0;
         return idx + 1;
@@ -272,9 +270,8 @@ namespace NextCampaign {
             days += GetDaysInMonth(prevMonth, prevYear);
             months--;
         }
-        string currentName = "\\$s\\$CCCCurrent: " + currentCampaign;//fa0
-        string nextName = "\\$s\\$CCCNext: " + nextCampaignName;//fa0
-        string releaseDate = "\\$fff" + Time::FormatString("%a, %d %B %Y at %H:%M ", int64(nextCampaignTimestamp));
+
+        string releaseDate = "\\$fff" + Time::FormatString("%a,%e %B %Y at %H:%M", int64(nextCampaignTimestamp));
 
         UI::PushStyleColor(UI::Col::WindowBg, vec4(0.4f, 0.2f, 0.6f, 0.9f));
         int flags = UI::WindowFlags::NoResize | UI::WindowFlags::NoScrollbar | UI::WindowFlags::AlwaysAutoResize;
@@ -303,9 +300,18 @@ namespace NextCampaign {
                 }
             }
         }
+        string currentName = "\\$s\\$CCCCurrent";//: " + currentCampaign;//fa0
+        string nextName = "\\$s\\$CCCNext";//: " + nextCampaignName;//fa0        
         UI::PushFontSize(20);
         UI::Text(currentName);
+        UI::PopFont();
+        UI::Text(currentCampaign);
+        UI::PushFontSize(20);
         UI::Text(nextName);
+        UI::PopFont();
+        UI::Text(nextCampaignName);
+        UI::PushFontSize(20);
+        UI::Text("\\$s\\$CCCNew season");
         UI::PopFont();
         UI::Separator();
         
