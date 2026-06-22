@@ -1,5 +1,4 @@
-namespace NextCampaign
-{
+namespace NextCampaign {
     const string CACHE_FILE = IO::FromStorageFolder("next_campaign_cache.json");
 
     Json::Value cache;
@@ -7,19 +6,18 @@ namespace NextCampaign
 
     string nextCampaignName = "";
     uint nextCampaignTimestamp = 0;
+    string currentCampaign = "";
 
     uint lastFetchAttempt = 0;
 
     // ===== INIT =====
 
-    void Main()
-    {
+    void Main() {
         LoadCache();
         startnew(UpdateLoop);
     }
 
-    void LoadCache()
-    {
+    void LoadCache() {
         if (IO::FileExists(CACHE_FILE)) {
             try {
                 cache = Json::FromFile(CACHE_FILE);
@@ -33,35 +31,33 @@ namespace NextCampaign
         ApplyCache();
     }
 
-    void SaveCache()
-    {
+    void SaveCache() {
         if (!cacheDirty) return;
         Json::ToFile(CACHE_FILE, cache, true);
         cacheDirty = false;
     }
 
-    void ApplyCache()
-    {
+    void ApplyCache() {
         if (cache.HasKey("nextCampaignName"))
             nextCampaignName = cache["nextCampaignName"];
 
         if (cache.HasKey("nextCampaignTimestamp"))
             nextCampaignTimestamp = cache["nextCampaignTimestamp"];
+
+        if (cache.HasKey("currentCampaign"))
+            currentCampaign = cache["currentCampaign"];
     }
 
     // ===== UPDATE LOOP =====
 
-    void UpdateLoop()
-    {
-        while (true)
-        {
+    void UpdateLoop() {
+        while (true) {
             TryFetch();
             sleep(60000); // check once per minute
         }
     }
 
-    void TryFetch()
-    {
+    void TryFetch() {
         // simple anti spam guard
         if (Time::Stamp - lastFetchAttempt < 30) return;
         lastFetchAttempt = Time::Stamp;
@@ -81,9 +77,11 @@ namespace NextCampaign
             return;
 
         string current = j["currentCampaign"];
+        currentCampaign = current;
         nextCampaignName = NextSeason(current);
         nextCampaignTimestamp = uint(j["endTimestamp"]);
 
+        cache["currentCampaign"] = currentCampaign;
         cache["nextCampaignName"] = nextCampaignName;
         cache["nextCampaignTimestamp"] = nextCampaignTimestamp;
 
@@ -97,9 +95,8 @@ namespace NextCampaign
 
     // ===== SEASON LOGIC =====
 
-    string NextSeason(const string &in current)
-    {
-        array<string> seasons = {"Winter", "Spring", "Summer", "Fall"};
+    string NextSeason(const string&in current) {
+        array<string> seasons = { "Winter", "Spring", "Summer", "Fall" };
 
         auto parts = current.Split(" ");
         if (parts.Length != 2) return "";
@@ -118,10 +115,54 @@ namespace NextCampaign
         return seasons[nextIdx] + " " + year;
     }
 
+    int GetQuarterFromSeason(const string&in season) {
+        if (season == "Winter") return 1;
+        if (season == "Spring") return 2;
+        if (season == "Summer") return 3;
+        if (season == "Fall") return 4;
+        return 0;
+    }
+
+    int quartersSinceSummer2020(int year, int quarter) {
+        int startYear = 2020;
+        int startQuarter = 2; // June 1, 2020 is in Q2
+        
+        int yearDifference = year - startYear;
+        int totalQuarters = yearDifference * 4 + (quarter - startQuarter);
+        return totalQuarters;
+    }
+
+    int seasonOrdinalSinceSummer2020(int year, int quarter) {
+        int seasonIndex = quarter - 1;
+        
+        array<int> firstYearBySeason = { 2021, 2021, 2020, 2020 };
+        if (seasonIndex < 0 || seasonIndex > 3) return 0;
+        
+        return year - firstYearBySeason[seasonIndex] + 1;
+    }
+
+    string toOrdinalNumber(int value) {
+        int mod100 = value % 100;
+        int mod10 = value % 10;
+        
+        if (mod100 >= 11 && mod100 <= 13) {
+            return value + "th";
+        }
+        
+        if (mod10 == 1) {
+            return value + "st";
+        } else if (mod10 == 2) {
+            return value + "nd";
+        } else if (mod10 == 3) {
+            return value + "rd";
+        }
+        
+        return value + "th";
+    }
+
     // ===== COUNTDOWN =====
 
-    int GetDaysInMonth(int month, int year)
-    {
+    int GetDaysInMonth(int month, int year) {
         if (month == 2) {
             if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) return 29;
             return 28;
@@ -130,8 +171,7 @@ namespace NextCampaign
         return 31;
     }
 
-    string GetCountdown()
-    {
+    string GetCountdown() {
         if (nextCampaignTimestamp == 0)
             return "No data";
 
@@ -176,8 +216,7 @@ namespace NextCampaign
         return res;
     }
 
-    void DrawCountdownDigit(int value, const string &in label, float width = 60.0f, bool leadingZero = true)
-    {
+    void DrawCountdownDigit(int value, const string&in label, float width = 60.0f, bool leadingZero = true) {
         UI::BeginGroup();
         
         // Number
@@ -198,11 +237,10 @@ namespace NextCampaign
         UI::EndGroup();
     }
 
-    void Render()
-    {
+    void Render() {
         //most of the UI checks here come from NaNInf's ChampionMedals via MedalsInMenu
         auto app = cast<CTrackMania@>(GetApp());
-         if (!sEnabled) return;
+        if (!sEnabled) return;
         if (sHideWithOP && !UI::IsOverlayShown()) return;
 
         if (app.RootMap !is null || app.CurrentPlayground !is null)
@@ -236,7 +274,7 @@ namespace NextCampaign
             months--;
         }
 
-        string textName = "\\$fffNext: " + nextCampaignName;
+        string textName = "\\$s\\$CCCNext: " + nextCampaignName;//fa0
         string releaseDate = "\\$fff" + Time::FormatString("%a, %d %B %Y at %H:%M ", int64(nextCampaignTimestamp));
 
         UI::PushStyleColor(UI::Col::WindowBg, vec4(0.4f, 0.2f, 0.6f, 0.9f));
@@ -244,29 +282,61 @@ namespace NextCampaign
         if (!sShowTitlebar) flags |= UI::WindowFlags::NoTitleBar;
         UI::Begin("NextCampaign™", flags);
         if (!sShowTitlebar) {
-            UI::Text("NextCampaign™");
+            UI::PushFontSize(25);
+            //UI::Text("\\$9feNextCampaign\\$a7f™");
+            UI::Text("\\$s\\$9FEN\\$9EEex\\$9DEt\\$9CECa\\$ABFm\\$AAFpa\\$A9Fi\\$A8Fgn\\$A7F™");
+            UI::PopFont();
         }
+        if (currentCampaign != "") {
+            auto parts = currentCampaign.Split(" ");
+            if (parts.Length == 2) {
+                string season = parts[0];
+                int year = Text::ParseInt(parts[1]);
+                int quarter = GetQuarterFromSeason(season);
+                if (quarter > 0) {
+                    int x = seasonOrdinalSinceSummer2020(year, quarter);
+                    int y = quartersSinceSummer2020(year, quarter);
+                    UI::Text("\\$fffThe current campaign is the");
+                    UI::Text("\\$fff" + toOrdinalNumber(x) + " " + season.ToLower() + " campaign, and");
+                    UI::Text("\\$fffthe " + toOrdinalNumber(y) + " campaign overall");
+                    UI::Text("\\$fffsince Summer 2020");
+                }
+            }
+        }
+        UI::PushFontSize(20);
         UI::Text(textName);
+        UI::PopFont();
         UI::Separator();
         
-        if (UI::BeginTable("countdown", 4)) {
-            UI::TableSetupColumn("mo", UI::TableColumnFlags::WidthFixed, width);
+        int cols = months > 0 ? 4 : 3;
+        if (UI::BeginTable("countdown", cols)) {
+            if (months > 0) {
+                UI::TableSetupColumn("mo", UI::TableColumnFlags::WidthFixed, width);
+            }
             UI::TableSetupColumn("d", UI::TableColumnFlags::WidthFixed, width);
             UI::TableSetupColumn("h", UI::TableColumnFlags::WidthFixed, width);
             UI::TableSetupColumn("m", UI::TableColumnFlags::WidthFixed, width);
 
-            UI::TableNextColumn(); DrawCountdownDigit(months, "months", width, false);
-            UI::TableNextColumn(); DrawCountdownDigit(days, "days", width, false);
-            UI::TableNextColumn(); DrawCountdownDigit(hours, "hours", width);
-            UI::TableNextColumn(); DrawCountdownDigit(mins, "minutes", width);
+            if (months > 0) {
+                UI::TableNextColumn();
+                DrawCountdownDigit(months, "months", width, false);
+            }
+            UI::TableNextColumn();
+            DrawCountdownDigit(days, "days", width, false);
+            UI::TableNextColumn();
+            DrawCountdownDigit(hours, "hours", width);
+            UI::TableNextColumn();
+            DrawCountdownDigit(mins, "minutes", width);
             UI::EndTable();
         }
         
         UI::Separator();
-        UI::Text("Release date:");
+        UI::PushFontSize(20);
+        UI::Text("\\$s\\$CCCRelease date"); //fa0
+        UI::PopFont();
         UI::Text(releaseDate);
         
-        UI::Text("\\$fffWeb:");
+        UI::Text("\\$a7fWeb:");
         UI::SameLine();
         if (UI::Selectable("\\$CCCnextcampaign.m8.no", false)) {
             OpenBrowserURL("https://nextcampaign.m8.no/");
@@ -277,12 +347,10 @@ namespace NextCampaign
     }
 }
 
-void Main()
-{
+void Main() {
     NextCampaign::Main();
 }
 
-void Render()
-{
+void Render() {
     NextCampaign::Render();
 }
