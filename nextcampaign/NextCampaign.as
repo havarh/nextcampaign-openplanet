@@ -71,22 +71,22 @@ namespace NextCampaign {
         if (!req.Finished() || req.ResponseCode() != 200)
             return;
 
-        auto j = req.Json();
+        auto responseJson = req.Json();
 
-        if (!j.HasKey("currentCampaign") || !j.HasKey("endTimestamp"))
+        if (!responseJson.HasKey("currentCampaign") || !responseJson.HasKey("endTimestamp"))
             return;
 
-        string current = j["currentCampaign"];
+        string current = responseJson["currentCampaign"];
         currentCampaign = current;
         nextCampaignName = NextSeason(current);
-        nextCampaignTimestamp = uint(j["endTimestamp"]);
+        nextCampaignTimestamp = uint(responseJson["endTimestamp"]);
 
         cache["currentCampaign"] = currentCampaign;
         cache["nextCampaignName"] = nextCampaignName;
         cache["nextCampaignTimestamp"] = nextCampaignTimestamp;
 
-        if (j.HasKey("nextRequestInSeconds")) {
-            cache["nextFetchAfter"] = Time::Stamp + uint(j["nextRequestInSeconds"]);
+        if (responseJson.HasKey("nextRequestInSeconds")) {
+            cache["nextFetchAfter"] = Time::Stamp + uint(responseJson["nextRequestInSeconds"]);
         }
 
         cacheDirty = true;
@@ -273,8 +273,8 @@ namespace NextCampaign {
             days += GetDaysInMonth(prevMonth, prevYear);
             months--;
         }
-
-        string textName = "\\$s\\$CCCNext: " + nextCampaignName;//fa0
+        string currentName = "\\$s\\$CCCCurrent: " + currentCampaign;//fa0
+        string nextName = "\\$s\\$CCCNext: " + nextCampaignName;//fa0
         string releaseDate = "\\$fff" + Time::FormatString("%a, %d %B %Y at %H:%M ", int64(nextCampaignTimestamp));
 
         UI::PushStyleColor(UI::Col::WindowBg, vec4(0.4f, 0.2f, 0.6f, 0.9f));
@@ -284,7 +284,8 @@ namespace NextCampaign {
         if (!sShowTitlebar) {
             UI::PushFontSize(25);
             //UI::Text("\\$9feNextCampaign\\$a7f™");
-            UI::Text("\\$s\\$9FEN\\$9EEex\\$9DEt\\$9CECa\\$ABFm\\$AAFpa\\$A9Fi\\$A8Fgn\\$A7F™");
+            //UI::Text("\\$s\\$9FEN\\$9EEex\\$9DEt\\$9CECa\\$ABFm\\$AAFpa\\$A9Fi\\$A8Fgn\\$A7F™");
+            UI::Text("\\$s\\$A7FN\\$A8Fex\\$A9Ft\\$AAFCa\\$ABFm\\$9CEpa\\$9DEi\\$9EEgn\\$9FE™");
             UI::PopFont();
         }
         if (currentCampaign != "") {
@@ -294,17 +295,18 @@ namespace NextCampaign {
                 int year = Text::ParseInt(parts[1]);
                 int quarter = GetQuarterFromSeason(season);
                 if (quarter > 0) {
-                    int x = seasonOrdinalSinceSummer2020(year, quarter);
-                    int y = quartersSinceSummer2020(year, quarter);
+                    int seasonOrdinal = seasonOrdinalSinceSummer2020(year, quarter);
+                    int overallOrdinal = quartersSinceSummer2020(year, quarter);
                     UI::Text("\\$fffThe current campaign is the");
-                    UI::Text("\\$fff" + toOrdinalNumber(x) + " " + season.ToLower() + " campaign, and");
-                    UI::Text("\\$fffthe " + toOrdinalNumber(y) + " campaign overall");
+                    UI::Text("\\$fff" + toOrdinalNumber(seasonOrdinal) + " " + season.ToLower() + " campaign, and");
+                    UI::Text("\\$fffthe " + toOrdinalNumber(overallOrdinal) + " campaign overall");
                     UI::Text("\\$fffsince Summer 2020");
                 }
             }
         }
         UI::PushFontSize(20);
-        UI::Text(textName);
+        UI::Text(currentName);
+        UI::Text(nextName);
         UI::PopFont();
         UI::Separator();
         
@@ -338,7 +340,7 @@ namespace NextCampaign {
         
         UI::Text("\\$a7fWeb:");
         UI::SameLine();
-        if (UI::Selectable("\\$CCCnextcampaign.m8.no", false)) {
+        if (UI::Selectable("\\$a7fnextcampaign.m8.no", false)) {
             OpenBrowserURL("https://nextcampaign.m8.no/");
         }
         
