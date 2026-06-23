@@ -10,6 +10,7 @@ namespace NextCampaign {
     array<string> seasons = { "Winter", "Spring", "Summer", "Fall" };
 
     uint lastFetchAttempt = 0;
+    UI::Font@ fontMontserratBold = UI::LoadFont("Montserrat-Bold.ttf");
 
     // ===== INIT =====
 
@@ -297,7 +298,7 @@ namespace NextCampaign {
         if (!sShowTitlebar) flags |= UI::WindowFlags::NoTitleBar;
         UI::Begin("NextCampaign™", flags);
         if (!sShowTitlebar) {
-            UI::PushFont(UI::Font::DefaultBold, 25);
+            UI::PushFont(fontMontserratBold, 25);
             //UI::Text("\\$9feNextCampaign\\$a7f™");
             //UI::Text("\\$s\\$9FEN\\$9EEex\\$9DEt\\$9CECa\\$ABFm\\$AAFpa\\$A9Fi\\$A8Fgn\\$A7F™");
             UI::Text("\\$s\\$A7FN\\$A8Fex\\$A9Ft\\$AAFCa\\$ABFm\\$9CEpa\\$9DEi\\$9EEgn\\$9FE™");
@@ -390,8 +391,8 @@ namespace NextCampaign {
         UI::PopFont();
         UI::Text(releaseDate);
         
-        UI::Text("\\$a7fWeb:");
-        UI::SameLine();
+        //UI::Text("\\$a7fWeb:");
+        //UI::SameLine();
         if (UI::Selectable("\\$a7fnextcampaign.m8.no", false)) {
             OpenBrowserURL("https://nextcampaign.m8.no/");
         }
