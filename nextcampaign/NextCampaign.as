@@ -213,21 +213,20 @@ namespace NextCampaign {
         return res;
     }
 
-    void DrawCountdownDigit(int value, const string&in label, float width = 60.0f, bool leadingZero = true) {
+    void DrawCountdownDigit(int value, const string&in label, bool leadingZero = true) {
         UI::BeginGroup();
+        float avail = UI::GetContentRegionAvail().x;
         
         // Number
         string valStr = (leadingZero && value < 10 ? "0" : "") + value;
         UI::PushFontSize(32);
-        vec2 textSize = UI::MeasureString(valStr);
-        UI::SetCursorPosX(UI::GetCursorPos().x + (width - textSize.x) / 2.0f);
+        UI::SetCursorPosX(UI::GetCursorPos().x + (avail - UI::MeasureString(valStr).x) / 2.0f);
         UI::Text(valStr);
         UI::PopFont();
         
         // Label
         UI::PushFontSize(13);
-        textSize = UI::MeasureString(label);
-        UI::SetCursorPosX(UI::GetCursorPos().x + (width - textSize.x) / 2.0f);
+        UI::SetCursorPosX(UI::GetCursorPos().x + (avail - UI::MeasureString(label).x) / 2.0f);
         UI::Text("\\$bbb" + label);
         UI::PopFont();
         
@@ -343,14 +342,14 @@ namespace NextCampaign {
 
             if (months > 0) {
                 UI::TableNextColumn();
-                DrawCountdownDigit(months, "months", width, false);
+                DrawCountdownDigit(months, "months", false);
             }
             UI::TableNextColumn();
-            DrawCountdownDigit(days, "days", width, false);
+            DrawCountdownDigit(days, "days", false);
             UI::TableNextColumn();
-            DrawCountdownDigit(hours, "hours", width);
+            DrawCountdownDigit(hours, "hours");
             UI::TableNextColumn();
-            DrawCountdownDigit(mins, "minutes", width);
+            DrawCountdownDigit(mins, "minutes");
             UI::EndTable();
         }
         UI::PopStyleColor(2);
