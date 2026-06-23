@@ -277,7 +277,9 @@ namespace NextCampaign {
         int days = int(target.Day) - int(now.Day);
         int hours = int(target.Hour) - int(now.Hour);
         int mins = int(target.Minute) - int(now.Minute);
+        int secs = int(target.Second) - int(now.Second);
 
+        if (secs < 0) { secs += 60; mins--; }
         if (mins < 0) { mins += 60; hours--; }
         if (hours < 0) { hours += 24; days--; }
         if (days < 0) {
@@ -342,30 +344,44 @@ namespace NextCampaign {
         UI::PushFont(UI::Font::DefaultBold, 20);
         UI::Text("\\$s\\$CCCNew season");
         UI::PopFont();
-        if (months == 0) {
+        bool showSecs = (months == 0 && days == 0);
+        bool showDays = !showSecs;
+        // cols: months?, days/secs, hours, mins, secs?
+        int cols = (months > 0 ? 1 : 0) + (showDays ? 1 : 0) + 2 + (showSecs ? 1 : 0);
+        if (cols <= 3) {
             width = 50.0f;
-        }        
-        int cols = months > 0 ? 4 : 3;
+        }
         UI::PushStyleColor(UI::Col::TableBorderLight, vec4(0.8f, 0.8f, 0.8f, 1.0f));
         UI::PushStyleColor(UI::Col::TableBorderStrong, vec4(0.8f, 0.8f, 0.8f, 1.0f));
         if (UI::BeginTable("countdown", cols, UI::TableFlags::BordersInnerV | UI::TableFlags::BordersOuterH | UI::TableFlags::BordersOuterV)) {
             if (months > 0) {
                 UI::TableSetupColumn("mo", UI::TableColumnFlags::WidthFixed, width);
             }
-            UI::TableSetupColumn("d", UI::TableColumnFlags::WidthFixed, width);
+            if (showDays) {
+                UI::TableSetupColumn("d", UI::TableColumnFlags::WidthFixed, width);
+            }
             UI::TableSetupColumn("h", UI::TableColumnFlags::WidthFixed, width);
             UI::TableSetupColumn("m", UI::TableColumnFlags::WidthFixed, width);
+            if (showSecs) {
+                UI::TableSetupColumn("s", UI::TableColumnFlags::WidthFixed, width);
+            }
 
             if (months > 0) {
                 UI::TableNextColumn();
                 DrawCountdownDigit(months, "month"+(months!=1?"s":""), width, false);
             }
-            UI::TableNextColumn();
-            DrawCountdownDigit(days, "day"+(days!=1?"s":""), width, false);
+            if (showDays) {
+                UI::TableNextColumn();
+                DrawCountdownDigit(days, "day"+(days!=1?"s":""), width, false);
+            }
             UI::TableNextColumn();
             DrawCountdownDigit(hours, "hour"+(hours!=1?"s":""), width);
             UI::TableNextColumn();
             DrawCountdownDigit(mins, "minute"+(mins!=1?"s":""), width);
+            if (showSecs) {
+                UI::TableNextColumn();
+                DrawCountdownDigit(secs, "second"+(secs!=1?"s":""), width);
+            }
             UI::EndTable();
         }
         UI::PopStyleColor(2);
