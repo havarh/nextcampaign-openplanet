@@ -321,12 +321,12 @@ namespace NextCampaign {
         if (UI::BeginTable("campaigns_info", 2)) {
             // Row 1: Headers
             UI::TableNextColumn();
-            UI::PushFontSize(20);
+            UI::PushFont(UI::Font::DefaultBold, 20);
             UI::Text("\\$s\\$CCCCurrent");
             UI::PopFont();
 
             UI::TableNextColumn();
-            UI::PushFontSize(20);
+            UI::PushFont(UI::Font::DefaultBold, 20);
             UI::Text("\\$s\\$CCCNext");
             UI::PopFont();
 
@@ -339,7 +339,7 @@ namespace NextCampaign {
 
             UI::EndTable();
         }
-        UI::PushFontSize(20);
+        UI::PushFont(UI::Font::DefaultBold, 20);
         UI::Text("\\$s\\$CCCNew season");
         UI::PopFont();
         if (months == 0) {
@@ -358,19 +358,18 @@ namespace NextCampaign {
 
             if (months > 0) {
                 UI::TableNextColumn();
-                DrawCountdownDigit(months, "months", width, false);
+                DrawCountdownDigit(months, "month"+(months!=1?"s":""), width, false);
             }
             UI::TableNextColumn();
-            DrawCountdownDigit(days, "days", width, false);
+            DrawCountdownDigit(days, "day"+(days!=1?"s":""), width, false);
             UI::TableNextColumn();
-            DrawCountdownDigit(hours, "hours", width);
+            DrawCountdownDigit(hours, "hour"+(hours!=1?"s":""), width);
             UI::TableNextColumn();
-            DrawCountdownDigit(mins, "minutes", width);
+            DrawCountdownDigit(mins, "minute"+(mins!=1?"s":""), width);
             UI::EndTable();
         }
         UI::PopStyleColor(2);
-        
-        UI::PushFontSize(20);
+        UI::PushFont(UI::Font::DefaultBold, 20);
         UI::Text("\\$s\\$CCCRelease date"); //fa0
         UI::PopFont();
         UI::Text(releaseDate);
