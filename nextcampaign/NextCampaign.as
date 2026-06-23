@@ -231,6 +231,7 @@ namespace NextCampaign {
         UI::Text("\\$bbb" + label);
         UI::PopFont();
         
+        UI::Dummy(vec2(0, 1));
         UI::EndGroup();
     }
 
@@ -246,7 +247,7 @@ namespace NextCampaign {
         if (nextCampaignTimestamp == 0)
             return;
 
-        float width = 35.0f; // Fixed width for each column /* 60.0f */
+        float width = 38.0f; // Fixed width for each column /* 60.0f */
 
         uint64 nowStamp = Time::Stamp;
         uint64 targetStamp = uint64(nextCampaignTimestamp);
@@ -255,6 +256,7 @@ namespace NextCampaign {
         auto target = Time::Parse(int64(targetStamp));
 
         int months = int(target.Month) - int(now.Month);
+
         if (target.Year > now.Year) months += (int(target.Year) - int(now.Year)) * 12;
         
         int days = int(target.Day) - int(now.Day);
@@ -325,10 +327,13 @@ namespace NextCampaign {
         UI::PushFontSize(20);
         UI::Text("\\$s\\$CCCNew season");
         UI::PopFont();
-        UI::Separator();
-        
+        if (months == 0) {
+            width = 50.0f;
+        }        
         int cols = months > 0 ? 4 : 3;
-        if (UI::BeginTable("countdown", cols)) {
+        UI::PushStyleColor(UI::Col::TableBorderLight, vec4(0.8f, 0.8f, 0.8f, 1.0f));
+        UI::PushStyleColor(UI::Col::TableBorderStrong, vec4(0.8f, 0.8f, 0.8f, 1.0f));
+        if (UI::BeginTable("countdown", cols, UI::TableFlags::BordersInnerV | UI::TableFlags::BordersOuterH | UI::TableFlags::BordersOuterV)) {
             if (months > 0) {
                 UI::TableSetupColumn("mo", UI::TableColumnFlags::WidthFixed, width);
             }
@@ -348,8 +353,8 @@ namespace NextCampaign {
             DrawCountdownDigit(mins, "minutes", width);
             UI::EndTable();
         }
+        UI::PopStyleColor(2);
         
-        UI::Separator();
         UI::PushFontSize(20);
         UI::Text("\\$s\\$CCCRelease date"); //fa0
         UI::PopFont();

@@ -3,3 +3,4 @@ name        = "NextCampaign"
 author      = "havarh"
 category    = "Utilities"
 permissions = ["Http"]
+min-api     = "1.4.0"
