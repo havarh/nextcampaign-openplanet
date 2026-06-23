@@ -1,6 +1,6 @@
 namespace NextCampaign {
     const string CACHE_FILE = IO::FromStorageFolder("next_campaign_cache.json");
-
+    bool mainMenuVisible = false;
     Json::Value cache;
     bool cacheDirty = false;
 
@@ -16,6 +16,18 @@ namespace NextCampaign {
     void Main() {
         LoadCache();
         startnew(UpdateLoop);
+        while (!AreLayersLoaded_Menu()) {
+            sleep(1000);
+        }
+        while (true) {
+            sleep(1000);
+            if (GetApp().RootMap is null) {
+                mainMenuVisible = GetLayer_Menu('Page_HomePage').Visible;
+            }
+            else {
+                mainMenuVisible = false;
+            }
+        }
     }
 
     void LoadCache() {
@@ -213,20 +225,21 @@ namespace NextCampaign {
         return res;
     }
 
-    void DrawCountdownDigit(int value, const string&in label, bool leadingZero = true) {
+    void DrawCountdownDigit(int value, const string&in label, float width = 60.0f, bool leadingZero = true) {
         UI::BeginGroup();
-        float avail = UI::GetContentRegionAvail().x;
         
         // Number
         string valStr = (leadingZero && value < 10 ? "0" : "") + value;
         UI::PushFontSize(32);
-        UI::SetCursorPosX(UI::GetCursorPos().x + (avail - UI::MeasureString(valStr).x) / 2.0f);
+        vec2 textSize = UI::MeasureString(valStr);
+        UI::SetCursorPosX(UI::GetCursorPos().x + (width - textSize.x) / 2.0f);
         UI::Text(valStr);
         UI::PopFont();
         
         // Label
         UI::PushFontSize(13);
-        UI::SetCursorPosX(UI::GetCursorPos().x + (avail - UI::MeasureString(label).x) / 2.0f);
+        textSize = UI::MeasureString(label);
+        UI::SetCursorPosX(UI::GetCursorPos().x + (width - textSize.x) / 2.0f);
         UI::Text("\\$bbb" + label);
         UI::PopFont();
         
@@ -239,6 +252,9 @@ namespace NextCampaign {
         auto app = cast<CTrackMania@>(GetApp());
         if (!sEnabled) return;
         if (sHideWithOP && !UI::IsOverlayShown()) return;
+        if (!mainMenuVisible) {
+            return;
+        }
 
         if (app.RootMap !is null || app.CurrentPlayground !is null)
             return;
@@ -279,7 +295,7 @@ namespace NextCampaign {
         if (!sShowTitlebar) flags |= UI::WindowFlags::NoTitleBar;
         UI::Begin("NextCampaign™", flags);
         if (!sShowTitlebar) {
-            UI::PushFontSize(25);
+            UI::PushFont(UI::Font::DefaultBold, 25);
             //UI::Text("\\$9feNextCampaign\\$a7f™");
             //UI::Text("\\$s\\$9FEN\\$9EEex\\$9DEt\\$9CECa\\$ABFm\\$AAFpa\\$A9Fi\\$A8Fgn\\$A7F™");
             UI::Text("\\$s\\$A7FN\\$A8Fex\\$A9Ft\\$AAFCa\\$ABFm\\$9CEpa\\$9DEi\\$9EEgn\\$9FE™");
@@ -342,14 +358,14 @@ namespace NextCampaign {
 
             if (months > 0) {
                 UI::TableNextColumn();
-                DrawCountdownDigit(months, "months", false);
+                DrawCountdownDigit(months, "months", width, false);
             }
             UI::TableNextColumn();
-            DrawCountdownDigit(days, "days", false);
+            DrawCountdownDigit(days, "days", width, false);
             UI::TableNextColumn();
-            DrawCountdownDigit(hours, "hours");
+            DrawCountdownDigit(hours, "hours", width);
             UI::TableNextColumn();
-            DrawCountdownDigit(mins, "minutes");
+            DrawCountdownDigit(mins, "minutes", width);
             UI::EndTable();
         }
         UI::PopStyleColor(2);
